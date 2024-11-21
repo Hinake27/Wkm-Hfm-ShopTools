@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品自訂義工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.5;
+            background-color: #f5f7f9;
+            padding: 2rem;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .header {
+            margin-bottom: 1.5rem;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .input[type="number"] {
+            width: 120px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #3182ce;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .preview-content {
+            font-family: monospace;
+            white-space: pre-wrap;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+        }
+
+        .copy-button {
+            padding: 0.5rem 1rem;
+            background: #3182ce;
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .copy-button:hover {
+            background: #2c5282;
+        }
+
+        .copy-button.success {
+            background: #48bb78;
+        }
+
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            body {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 車輛配置卡片 -->
+        <div class="card">
+            <div class="header">
+                <h1 class="title">車輛設定</h1>
+            </div>
+            
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>啟用車輛設定</h3>
+                    <label class="switch">
+                        <input type="checkbox" id="vehicle-enabled" onchange="updatePreview()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="vehicle-settings">
+                <div class="form-group">
+                    <label class="label">車輛名稱</label>
+                    <input type="text" class="input" id="vehicle-name" value="海盜龜龜車 Pirate Turtle Wagon" onchange="updatePreview()">
+                </div>
+
+                <div class="form-group">
+                    <label class="label">價格 (NTD)</label>
+                    <input type="number" class="input" id="vehicle-price-ntd" value="369" onchange="updatePreview()">
+                </div>
+
+                <div class="form-group">
+                    <label class="label">價格 (USD)</label>
+                    <input type="number" class="input" id="vehicle-price-usd" value="12" onchange="updatePreview()">
+                </div>
+
+                <div class="form-group">
+                    <label class="label">車輛類型</label>
+                    <div style="display: flex; gap: 1rem;">
+                        <label>
+                            <input type="radio" name="vehicle-type" value="car" checked onchange="updatePreview()"> 汽車
+                        </label>
+                        <label>
+                            <input type="radio" name="vehicle-type" value="motorcycle" onchange="updatePreview()"> 摩托車
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">座位數</label>
+                    <input type="number" class="input" id="seats" value="2" min="1" onchange="updatePreview()">
+                </div>
+
+                <div class="form-group">
+                    <h4>特殊功能</h4>
+                    <div style="margin-top: 1rem;">
+                        <div class="feature-item">
+                            <span>飛天功能</span>
+                            <label class="switch">
+                                <input type="checkbox" id="feature-flying" onchange="updatePreview()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="feature-item">
+                            <span>防彈輪胎</span>
+                            <label class="switch">
+                                <input type="checkbox" id="feature-bulletproof" onchange="updatePreview()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="feature-item">
+                            <span>鏟車功能</span>
+                            <label class="switch">
+                                <input type="checkbox" id="feature-heavy" onchange="updatePreview()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 槍枝配置卡片 -->
+        <div class="card">
+            <div class="header">
+                <h1 class="title">槍枝設定</h1>
+            </div>
+            
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>啟用槍枝設定</h3>
+                    <label class="switch">
+                        <input type="checkbox" id="weapon-enabled" onchange="updatePreview()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="weapon-settings">
+                <div class="form-group">
+                    <label class="label">槍枝名稱</label>
+                    <input type="text" class="input" id="weapon-name" value="☾ 蠑螈 ☽" onchange="updatePreview()">
+                </div>
+
+                <div class="form-group">
+                    <label class="label">價格 (NTD)</label>
+                    <input type="number" class="input" id="weapon-price-ntd" value="900" onchange="updatePreview()">
+                </div>
+
+                <div class="feature-item">
+                    <span>發光效果</span>
+                    <label class="switch">
+                        <input type="checkbox" id="feature-glow" onchange="updatePreview()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 預覽卡片 -->
+        <div class="card full-width">
+            <div class="preview-header">
+                <h2>即時預覽</h2>
+                <button class="copy-button" id="copyButton" onclick="copyToClipboard()">
+                    複製 Markdown
+                </button>
+            </div>
+            <div id="preview-content" class="preview-content"></div>
+        </div>
+    </div>
+
+    <script>
+        function updatePreview() {
+            const vehicleEnabled = document.getElementById('vehicle-enabled').checked;
+            const weaponEnabled = document.getElementById('weapon-enabled').checked;
+            let previewText = '';
+
+            if (vehicleEnabled) {
+                const vehicleName = document.getElementById('vehicle-name').value;
+                const vehicleType = document.querySelector('input[name="vehicle-type"]:checked').value;
+                const seats = document.getElementById('seats').value;
+                const priceNTD = document.getElementById('vehicle-price-ntd').value;
+                const priceUSD = document.getElementById('vehicle-price-usd').value;
+                const flying = document.getElementById('feature-flying').checked;
+                const bulletproof = document.getElementById('feature-bulletproof').checked;
+                const heavy = document.getElementById('feature-heavy').checked;
+
+                previewText += `**名稱 Name**：${vehicleName}\n`;
+                previewText += `**類型 Type**：${vehicleType === 'car' ? '汽車 Car' : '摩托車 Motorcycle'}\n`;
+                previewText += `**單位 Unit**：${seats}人座 ${seats} Seats\n`;
+                previewText += `**價格 Price**：${priceNTD} NTD / ${priceUSD} USD\n\n`;
+
+                const features = [];
+                if (flying) features.push('飛天功能 Flying');
+                if (bulletproof) features.push('防彈輪胎 Bulletproof tires');
+                if (heavy) features.push('鏟車功能 shovel feature');
+
+                if (features.length > 0) {
+                    previewText += '**特殊功能 Special Features**：\n';
+                    features.forEach(f => previewText += `- ${f}\n`);
+                }
+            }
+
+            if (weaponEnabled) {
+                if (vehicleEnabled) previewText += '\n---\n\n';
+                
+                const weaponName = document.getElementById('weapon-name').value;
+                const weaponPrice = document.getElementById('weapon-price-ntd').value;
+                const glow = document.getElementById('feature-glow').checked;
+
+                previewText += `**武器名稱 Weapon Name**：${weaponName}\n`;
+                previewText += `**武器價格 Weapon Price**：${weaponPrice} NTD\n`;
+                if (glow) previewText += '✨ 發光效果 Glow Effect\n';
+            }
+
+            document.getElementById('preview-content').textContent = previewText;
+        }
+
+        async function copyToClipboard() {
+            const previewText = document.getElementById('preview-content').textContent;
+            try {
+                await navigator.clipboard.writeText(previewText);
+                const copyButton = document.getElementById('copyButton');
+                copyButton.classList.add('success');
+                copyButton.textContent = '已複製！';
+                setTimeout(() => {
+                    copyButton.classList.remove('success');
+                    copyButton.textContent = '複製 Markdown';
+                }, 2000);
+            } catch (err) {
+                console.error('複製失敗:', err);
+                alert('複製失敗，請重試');
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePreview();
+        });
+    </script>
+</body>
+</html>
